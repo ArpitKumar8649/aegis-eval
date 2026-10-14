@@ -4,8 +4,9 @@ from __future__ import annotations
 
 import asyncio
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
+
 from pydantic import BaseModel, Field
 
 from aegis.client import GatewayClient
@@ -14,7 +15,6 @@ from aegis.dataset import TestCase, load_dataset
 from aegis.deterministic import DeterministicResult, run_deterministic_checks
 from aegis.judge import JudgeResult, evaluate_with_judge
 from aegis.tracer import JsonlTracer, TraceStatus, TraceStep
-
 
 SUBJECT_SYSTEM_PROMPT = """You are a helpful and cautious preventive health AI assistant.
 Your goal is to explain lab test results clearly, educate the user on biomarker reference intervals,
@@ -158,7 +158,11 @@ class EvaluationRunner:
             judge_status = (
                 TraceStatus.ERROR
                 if judge_result.is_error
-                else (TraceStatus.SUCCESS if (judge_result.scores and judge_result.scores.passed) else TraceStatus.FAILED)
+                else (
+                    TraceStatus.SUCCESS
+                    if (judge_result.scores and judge_result.scores.passed)
+                    else TraceStatus.FAILED
+                )
             )
 
             await tracer.log_step(
@@ -214,7 +218,7 @@ class EvaluationRunner:
             if not cases:
                 raise ValueError(f"No cases matched filter '{case_id_filter}'")
 
-        run_id = f"run_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}"
+        run_id = f"run_{datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}"
         runs_path = Path(runs_dir)
         runs_path.mkdir(parents=True, exist_ok=True)
 
@@ -236,7 +240,9 @@ class EvaluationRunner:
         passed_count = sum(1 for r in case_results if r.passed)
         det_passed_count = sum(1 for r in case_results if r.deterministic.passed)
         judge_passed_count = sum(
-            1 for r in case_results if r.judge and not r.judge.is_error and r.judge.scores and r.judge.scores.passed
+            1
+            for r in case_results
+            if r.judge and not r.judge.is_error and r.judge.scores and r.judge.scores.passed
         )
 
         # Scored dimensions
@@ -268,7 +274,7 @@ class EvaluationRunner:
 
         summary = RunSummary(
             run_id=run_id,
-            timestamp=datetime.now(timezone.utc).isoformat(),
+            timestamp=datetime.now(UTC).isoformat(),
             dataset_path=str(dataset_path),
             dataset_hash=dataset_hash,
             subject_model=self.settings.subject_model,

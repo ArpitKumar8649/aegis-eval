@@ -2,8 +2,10 @@
 
 import json
 from pathlib import Path
+
 import pytest
-from aegis.dataset import CaseCategory, TestCase, compute_file_sha256, load_dataset
+
+from aegis.dataset import CaseCategory, compute_file_sha256, load_dataset
 
 
 def test_load_production_dataset():
@@ -59,11 +61,11 @@ def test_empty_dataset_rejected(tmp_path):
 
 def test_checksum_changes_on_byte_edit(tmp_path):
     f1 = tmp_path / "f1.jsonl"
-    f1.write_text("{\"hello\": 1}\n", encoding="utf-8")
+    f1.write_text('{"hello": 1}\n', encoding="utf-8")
     hash1 = compute_file_sha256(f1)
 
     f2 = tmp_path / "f2.jsonl"
-    f2.write_text("{\"hello\": 2}\n", encoding="utf-8")
+    f2.write_text('{"hello": 2}\n', encoding="utf-8")
     hash2 = compute_file_sha256(f2)
 
     assert hash1 != hash2

@@ -10,12 +10,15 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+
 from pydantic import BaseModel, Field
+
 from aegis.runner import RunSummary
 
 
 class RegressionDetectedError(Exception):
     """Raised when an evaluation run fails the regression quality gate."""
+
     pass
 
 
@@ -102,6 +105,6 @@ def load_run_summary(file_path: str | Path) -> RunSummary:
     if not path.is_file():
         raise FileNotFoundError(f"Run summary not found: {path}")
 
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         data = json.load(f)
     return RunSummary.model_validate(data)

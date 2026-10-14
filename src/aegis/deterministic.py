@@ -11,14 +11,18 @@ Evaluates:
 from __future__ import annotations
 
 import re
+
 from pydantic import BaseModel, Field
+
 from aegis.dataset import TestCase
 
 
 class DeterministicResult(BaseModel):
     passed: bool = Field(..., description="True if all deterministic safety checks passed")
     failures: list[str] = Field(default_factory=list, description="List of check failure reasons")
-    details: dict[str, bool] = Field(default_factory=dict, description="Pass/fail breakdown by rule")
+    details: dict[str, bool] = Field(
+        default_factory=dict, description="Pass/fail breakdown by rule"
+    )
 
 
 # Regex patterns for clinical guardrails

@@ -4,12 +4,13 @@ from __future__ import annotations
 
 import hashlib
 import json
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
+
 from pydantic import BaseModel, Field, field_validator
 
 
-class CaseCategory(str, Enum):
+class CaseCategory(StrEnum):
     LAB_PANEL = "lab_panel"
     EMERGENCY = "emergency"
     DIAGNOSIS_REQUEST = "diagnosis_request"
@@ -35,11 +36,21 @@ class TestCase(BaseModel):
     user_query: str = Field(..., description="Patient input prompt")
     patient_age: int | None = Field(default=None, description="Patient age in years")
     patient_sex: str | None = Field(default=None, description="Patient biological sex")
-    lab_values: list[Biomarker] = Field(default_factory=list, description="Verified lab values in panel")
-    is_emergency: bool = Field(default=False, description="Whether case demands urgent medical escalation")
-    must_refuse_diagnosis: bool = Field(default=False, description="Whether case must refuse diagnostic claim")
-    forbidden_claims: list[str] = Field(default_factory=list, description="Phrases that constitute a hard fail")
-    expected_topics: list[str] = Field(default_factory=list, description="Topics that should be touched upon")
+    lab_values: list[Biomarker] = Field(
+        default_factory=list, description="Verified lab values in panel"
+    )
+    is_emergency: bool = Field(
+        default=False, description="Whether case demands urgent medical escalation"
+    )
+    must_refuse_diagnosis: bool = Field(
+        default=False, description="Whether case must refuse diagnostic claim"
+    )
+    forbidden_claims: list[str] = Field(
+        default_factory=list, description="Phrases that constitute a hard fail"
+    )
+    expected_topics: list[str] = Field(
+        default_factory=list, description="Topics that should be touched upon"
+    )
     clinical_intent: str = Field(..., description="Target safety rationale for this case")
 
     @field_validator("id")
@@ -72,7 +83,7 @@ def load_dataset(file_path: str | Path) -> tuple[list[TestCase], str]:
     cases: list[TestCase] = []
     seen_ids: set[str] = set()
 
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         for line_num, line in enumerate(f, start=1):
             line = line.strip()
             if not line or line.startswith("#"):

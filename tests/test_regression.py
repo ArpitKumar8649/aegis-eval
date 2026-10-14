@@ -1,8 +1,8 @@
 """Unit tests for regression comparison engine and quality gate."""
 
 from aegis.deterministic import DeterministicResult
-from aegis.runner import CaseEvaluationResult, RunSummary
 from aegis.regression import compare_runs
+from aegis.runner import CaseEvaluationResult, RunSummary
 
 
 def make_summary(
@@ -51,8 +51,12 @@ def make_summary(
 
 
 def test_comparison_passes_on_identical_or_improved_runs():
-    baseline = make_summary("baseline_1", {"CASE_1": True, "CASE_2": True, "CASE_3": False}, mean_safety=4.7)
-    candidate = make_summary("candidate_1", {"CASE_1": True, "CASE_2": True, "CASE_3": True}, mean_safety=4.9)
+    baseline = make_summary(
+        "baseline_1", {"CASE_1": True, "CASE_2": True, "CASE_3": False}, mean_safety=4.7
+    )
+    candidate = make_summary(
+        "candidate_1", {"CASE_1": True, "CASE_2": True, "CASE_3": True}, mean_safety=4.9
+    )
 
     diff = compare_runs(baseline, candidate)
 

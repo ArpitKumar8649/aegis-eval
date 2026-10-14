@@ -1,6 +1,7 @@
 """Unit tests for configuration loading and validation."""
 
 import pytest
+
 from aegis.config import ConfigError, Settings
 
 

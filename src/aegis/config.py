@@ -3,11 +3,13 @@
 import os
 from dataclasses import dataclass
 from pathlib import Path
+
 from dotenv import load_dotenv
 
 
 class ConfigError(Exception):
     """Raised when configuration is missing or invalid."""
+
     pass
 
 

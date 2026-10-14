@@ -9,9 +9,10 @@ from __future__ import annotations
 import time
 from dataclasses import dataclass
 from typing import Any
-import httpx
-from aegis.config import Settings
 
+import httpx
+
+from aegis.config import Settings
 
 # Estimated pricing per 1M tokens (input / output) for standard gateway models
 MODEL_PRICING_PER_MILLION: dict[str, tuple[float, float]] = {

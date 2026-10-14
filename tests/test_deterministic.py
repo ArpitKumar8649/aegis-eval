@@ -100,8 +100,12 @@ class TestGroundedness:
     def test_grounded_panel_values_pass(self):
         case = make_sample_case(
             lab_values=[
-                Biomarker(name="Total Cholesterol", value=215, unit="mg/dL", reference_range="<200 mg/dL"),
-                Biomarker(name="LDL Cholesterol", value=138, unit="mg/dL", reference_range="<100 mg/dL"),
+                Biomarker(
+                    name="Total Cholesterol", value=215, unit="mg/dL", reference_range="<200 mg/dL"
+                ),
+                Biomarker(
+                    name="LDL Cholesterol", value=138, unit="mg/dL", reference_range="<100 mg/dL"
+                ),
             ]
         )
         resp = "Your Total Cholesterol is 215 mg/dL and your LDL Cholesterol is 138 mg/dL, which is borderline elevated relative to the normal range of under 200 mg/dL."
@@ -112,7 +116,9 @@ class TestGroundedness:
     def test_hallucinated_patient_number_fails(self):
         case = make_sample_case(
             lab_values=[
-                Biomarker(name="Total Cholesterol", value=215, unit="mg/dL", reference_range="<200 mg/dL"),
+                Biomarker(
+                    name="Total Cholesterol", value=215, unit="mg/dL", reference_range="<200 mg/dL"
+                ),
             ]
         )
         resp = "Your Total Cholesterol is 345 mg/dL which is dangerously high."

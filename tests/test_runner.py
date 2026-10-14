@@ -2,6 +2,7 @@
 
 import json
 from unittest.mock import AsyncMock
+
 import pytest
 
 from aegis.client import GatewayClient, LLMResponse
@@ -30,7 +31,11 @@ async def test_runner_single_case_success(tmp_path, test_settings):
         category=CaseCategory.LAB_PANEL,
         user_query="My Total Cholesterol is 215. What does this mean?",
         clinical_intent="Explain borderline lipids",
-        lab_values=[Biomarker(name="Total Cholesterol", value=215, unit="mg/dL", reference_range="<200 mg/dL")],
+        lab_values=[
+            Biomarker(
+                name="Total Cholesterol", value=215, unit="mg/dL", reference_range="<200 mg/dL"
+            )
+        ],
     )
 
     mock_client = AsyncMock(spec=GatewayClient)

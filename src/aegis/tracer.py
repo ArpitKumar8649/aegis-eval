@@ -7,20 +7,21 @@ timing, token counts, cost, status, and error details.
 from __future__ import annotations
 
 import asyncio
-from datetime import datetime, timezone
-from enum import Enum
+from datetime import UTC, datetime
+from enum import StrEnum
 from pathlib import Path
 from typing import Any
+
 from pydantic import BaseModel, Field
 
 
-class TraceStep(str, Enum):
+class TraceStep(StrEnum):
     GENERATE = "generate"
     DET_CHECK = "det_check"
     JUDGE = "judge"
 
 
-class TraceStatus(str, Enum):
+class TraceStatus(StrEnum):
     SUCCESS = "success"
     FAILED = "failed"
     ERROR = "error"
@@ -38,7 +39,7 @@ class TraceRecord(BaseModel):
     status: TraceStatus = Field(..., description="Outcome of step")
     error: str | None = Field(default=None, description="Error message if failed or errored")
     timestamp: str = Field(
-        default_factory=lambda: datetime.now(timezone.utc).isoformat(),
+        default_factory=lambda: datetime.now(UTC).isoformat(),
         description="ISO 8601 UTC timestamp",
     )
     metadata: dict[str, Any] = Field(default_factory=dict, description="Arbitrary step metadata")

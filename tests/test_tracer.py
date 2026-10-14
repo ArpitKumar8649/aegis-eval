@@ -1,7 +1,9 @@
 """Unit tests for flat JSONL execution tracer."""
 
 import json
+
 import pytest
+
 from aegis.tracer import JsonlTracer, TraceRecord, TraceStatus, TraceStep
 
 

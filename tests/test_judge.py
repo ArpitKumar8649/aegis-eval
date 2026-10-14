@@ -1,14 +1,12 @@
 """Unit tests for calibrated LLM-as-a-judge scoring engine (mocked, no network)."""
 
-import pytest
 from unittest.mock import AsyncMock
+
+import pytest
+
 from aegis.client import GatewayClient, LLMResponse
-from aegis.config import Settings
 from aegis.dataset import CaseCategory, TestCase
 from aegis.judge import (
-    JudgeResult,
-    JudgeRubricScore,
-    build_judge_prompt,
     evaluate_with_judge,
     extract_json_object,
 )
