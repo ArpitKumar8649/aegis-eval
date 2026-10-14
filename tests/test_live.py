@@ -6,11 +6,14 @@ Skipped automatically when API keys are absent or invalid.
 import os
 
 import pytest
+from dotenv import load_dotenv
 
 from aegis.config import Settings
 from aegis.dataset import Biomarker, CaseCategory, TestCase
 from aegis.runner import EvaluationRunner
 from aegis.tracer import JsonlTracer
+
+load_dotenv()
 
 
 def has_live_credentials() -> bool:
