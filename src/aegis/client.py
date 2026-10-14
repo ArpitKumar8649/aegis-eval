@@ -33,6 +33,7 @@ class LLMResponse:
     cost_usd: float
     model: str
     raw_response: dict[str, Any]
+    stop_reason: str | None = None
 
 
 class GatewayClient:
@@ -106,6 +107,9 @@ class GatewayClient:
             tokens_out = usage.get("output_tokens", 0)
 
             cost = self._calculate_cost(model, tokens_in, tokens_out)
+            stop_reason = data.get("stop_reason") or (
+                data.get("choices", [{}])[0].get("finish_reason") if data.get("choices") else None
+            )
 
             return LLMResponse(
                 content=content_text.strip(),
@@ -115,6 +119,7 @@ class GatewayClient:
                 cost_usd=cost,
                 model=model,
                 raw_response=data,
+                stop_reason=stop_reason,
             )
         finally:
             if self._external_client is None:

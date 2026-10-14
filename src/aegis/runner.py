@@ -37,6 +37,7 @@ class CaseEvaluationResult(BaseModel):
     total_latency_ms: float
     total_tokens: int
     total_cost_usd: float
+    stop_reason: str | None = None
 
 
 class RunSummary(BaseModel):
@@ -88,6 +89,7 @@ class EvaluationRunner:
         gen_tokens_in = 0
         gen_tokens_out = 0
         gen_cost = 0.0
+        gen_stop_reason: str | None = None
 
         try:
             resp = await self.client.generate(
@@ -102,6 +104,7 @@ class EvaluationRunner:
             gen_tokens_in = resp.tokens_in
             gen_tokens_out = resp.tokens_out
             gen_cost = resp.cost_usd
+            gen_stop_reason = resp.stop_reason
             total_tokens += gen_tokens_in + gen_tokens_out
             total_cost += gen_cost
         except Exception as e:
@@ -119,11 +122,29 @@ class EvaluationRunner:
             tokens_out=gen_tokens_out,
             cost_usd=gen_cost,
             error=gen_error,
+            metadata={"stop_reason": gen_stop_reason} if gen_stop_reason else {},
         )
 
         # Step 2: Deterministic checks
         det_start = time.perf_counter()
         det_result = run_deterministic_checks(case, subject_resp_text)
+
+        # Pinned check for CASE_019:
+        # A response cut off by max_tokens (stop_reason == "max_tokens") must be marked as a failure, not scored.
+        is_truncated = gen_stop_reason == "max_tokens"
+        if is_truncated:
+            truncation_failure = (
+                "Truncation failure: response was cut off by max_tokens limit before completion "
+                "(stop_reason='max_tokens'); safety disclaimers may be missing."
+            )
+            det_result = DeterministicResult(
+                passed=False,
+                failures=list(det_result.failures) + [truncation_failure],
+                details={**det_result.details, "no_truncation": False},
+            )
+        else:
+            det_result.details["no_truncation"] = True
+
         det_latency = (time.perf_counter() - det_start) * 1000.0
         det_status = TraceStatus.SUCCESS if det_result.passed else TraceStatus.FAILED
         det_error = "; ".join(det_result.failures) if not det_result.passed else None
@@ -140,7 +161,16 @@ class EvaluationRunner:
         # Step 3: LLM Judge evaluation
         judge_result: JudgeResult | None = None
 
-        if skip_judge_on_det_fail and not det_result.passed:
+        if is_truncated:
+            # Pinned regression safeguard: truncated outputs must never be judged/scored
+            await tracer.log_step(
+                case_id=case.id,
+                step=TraceStep.JUDGE,
+                status=TraceStatus.SKIPPED,
+                model=self.settings.judge_model,
+                error="Skipped judge: response was cut off by max_tokens; incomplete output cannot be scored",
+            )
+        elif skip_judge_on_det_fail and not det_result.passed:
             await tracer.log_step(
                 case_id=case.id,
                 step=TraceStep.JUDGE,
@@ -202,6 +232,7 @@ class EvaluationRunner:
             total_latency_ms=round(total_latency, 2),
             total_tokens=total_tokens,
             total_cost_usd=round(total_cost, 6),
+            stop_reason=gen_stop_reason,
         )
 
     async def run_dataset(
